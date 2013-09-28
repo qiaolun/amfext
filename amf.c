@@ -1026,7 +1026,7 @@ static int getHashKeyLen(HashTable *ht) {
 }
 
 /**  serializes an Hash Table as AMF3 as plain object */
-static void amf3_serialize_object_default(amf_serialize_output buf,HashTable* myht, const char * className,int classNameLen,amf_serialize_data_t*var_hash TSRMLS_DC)
+static void amf3_serialize_object_default(amf_serialize_output buf,HashTable* myht, const char * className1,int classNameLen1,amf_serialize_data_t*var_hash TSRMLS_DC)
 {
     char *key;
     zval **data;
@@ -1034,6 +1034,17 @@ static void amf3_serialize_object_default(amf_serialize_output buf,HashTable* my
     uint key_len;
     HashPosition pos;
     ulong*val;
+
+    char *className;
+    int classNameLen;
+    if(classNameLen == 0) {
+        className = "stdClass";
+        classNameLen = 8;
+    } else {
+        className = className1;
+        classNameLen = classNameLen1;
+    }
+
 
     int encoding, traitsInfo;
     int writeTraits = 1;
@@ -1067,6 +1078,7 @@ static void amf3_serialize_object_default(amf_serialize_output buf,HashTable* my
         traitsInfo |= memberCount << AMF_CLASS_MEMBERCOUNT_SHIFT; // << 4
 
 
+        // php_error(E_WARNING, "var_no %d", var_no);
         amf3_write_objecthead(buf, traitsInfo AMFTSRMLS_CC);
     }
 
@@ -1984,6 +1996,7 @@ static void amf3_serialize_var(amf_serialize_output buf, zval **struc, amf_seria
         case IS_BOOL: amf_write_byte(buf, Z_LVAL_PP(struc) != 0 ? AMF3_TRUE : AMF3_FALSE); return;
         case IS_NULL: amf_write_byte(buf, AMF3_NULL); return;
         case IS_LONG:
+
                       /*  AMF3 integer: b(4) ber encoding(1-4) only if not too big 29 bit */
                       {
                           long d = Z_LVAL_PP(struc);
@@ -1994,6 +2007,7 @@ static void amf3_serialize_var(amf_serialize_output buf, zval **struc, amf_seria
                           }
                           else
                           {
+
                               amf_write_byte(buf, AMF3_NUMBER);
                               amf3_write_number(buf,d,var_hash AMFTSRMLS_CC);
                           }
