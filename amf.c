@@ -1037,7 +1037,7 @@ static void amf3_serialize_object_default(amf_serialize_output buf,HashTable* my
 
     char *className;
     int classNameLen;
-    if(classNameLen == 0) {
+    if(classNameLen1 == 0) {
         className = "stdClass";
         classNameLen = 8;
     } else {
